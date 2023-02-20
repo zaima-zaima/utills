@@ -6,6 +6,6 @@
  * @returns 随机生成指定阈值的数字
  */
 
-export function randomNumberGenerator(min:number,max:number):number {
+export default function (min:number,max:number):number {
     return Math.floor(Math.random()*(max - min) + min);
 }
