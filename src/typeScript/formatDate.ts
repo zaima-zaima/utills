@@ -9,6 +9,10 @@
  */
 
 export default function (timeStamp:string | number,symbol:string="-",time=false) {
+
+    if(!timeStamp) {
+        return null;
+    }
   
     const date = new Date(+timeStamp);
     const year = date.getFullYear();
