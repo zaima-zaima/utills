@@ -1,4 +1,4 @@
-export function queryParser(query: string) {
+export function queryParser<T>(query: string) {
   let queryObject = {};
   const reg = /^\?[\w].+$/;
   if (reg.test(query)) {
@@ -10,5 +10,5 @@ export function queryParser(query: string) {
     queryObject[queryItemKeyValue[0]] = queryItemKeyValue[1];
   }
 
-  return queryObject;
+  return queryObject as T;
 }
