@@ -1,6 +1,6 @@
-export default function unique(target: any[], signal = "id") {
-  let tmp = {} as any;
-  let array = [] as any[];
+export default function unique<T>(target: T[], signal = "id") {
+  let tmp = {};
+  let array = [] as T[];
   for (let tar in target) {
     tmp[target[tar][signal]] = target[tar];
   }
