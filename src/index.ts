@@ -1,5 +1,6 @@
 // import { queryParser } from "./typeScript/parse-query";
 
+import { checkFile } from "./api/upload";
 import { upload } from "./typeScript/upload";
 
 // const query = queryParser(
@@ -22,6 +23,15 @@ input.onchange = (event) => {
   upload("/upload", fileArray, {
     limit: 1024 * 1024 * 10,
     spreadSize: 1024 * 1024 * 2,
+    preCheck: async (hash) => {
+      const result = await checkFile(hash);
+
+      if (result.code === 0) {
+        return result.data;
+      }
+
+      return null;
+    },
     // accept: ["jpeg", "zip"],
   });
 };

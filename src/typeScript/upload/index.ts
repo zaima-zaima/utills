@@ -6,11 +6,12 @@ export type UploadMethod = "formData";
 
 export type UploadNetMethod = "GET" | "POST" | "PUT" | "DELETE";
 
-interface PreCheckResposne {
+export interface PreCheckResposne {
   done: boolean;
   progress: number;
-  filename: number;
+  filename: string;
   key: string;
+  token: string;
 }
 
 /**
@@ -28,7 +29,7 @@ interface UploadOption {
   spreadSize?: number;
   accept?: string[];
   method?: UploadNetMethod;
-  preCheck?: (file: File) => PreCheckResposne;
+  preCheck?: (hash: string) => Promise<PreCheckResposne | null>;
 }
 
 export function upload(url: string, file: File[], option?: UploadOption): void;
@@ -38,11 +39,30 @@ export async function upload(
   file: File[],
   option?: UploadOption
 ): Promise<void> {
+  if (!url || !file) {
+    return;
+  }
+
   const hash = await createHash(file[0]);
 
-  console.log("====================================");
-  console.log(hash);
-  console.log("====================================");
+  // 对文件进行预检
+
+  const progress = option && option.preCheck && (await option.preCheck(hash));
+
+  if (progress && !progress.done) {
+    // 成功获取进度并且文件没有传输完毕
+    console.log("====================================");
+    console.log(progress);
+    console.log("====================================");
+  }
+
+  // console.log("====================================");
+  // console.log(progress);
+  // console.log("====================================");
+
+  // console.log("====================================");
+  // console.log(hash);
+  // console.log("====================================");
 
   // const buffer = await file[0].arrayBuffer();
 
