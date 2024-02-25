@@ -1,5 +1,6 @@
 import checkFileSize from "./core/checkFileSize";
 import fileSlice from "./core/fileSlice";
+import { createHash } from "./utils/createHash";
 
 export type UploadMethod = "formData";
 
@@ -32,7 +33,33 @@ interface UploadOption {
 
 export function upload(url: string, file: File[], option?: UploadOption): void;
 
-export function upload(url: string, file: File[], option?: UploadOption): void {
+export async function upload(
+  url: string,
+  file: File[],
+  option?: UploadOption
+): Promise<void> {
+  const hash = await createHash(file[0]);
+
+  console.log("====================================");
+  console.log(hash);
+  console.log("====================================");
+
+  // const buffer = await file[0].arrayBuffer();
+
+  // console.log("====================================");
+  // console.log(crypto.lib.WordArray.create(buffer));
+  // console.log("====================================");
+
+  // console.log("====================================");
+  // console.log(file[0].toString());
+  // console.log("====================================");
+
+  // const type = crypto.lib.WordArray.create(buffer);
+
+  // console.log("====================================");
+  // console.log(crypto.MD5(type).toString());
+  // console.log("====================================");
+
   // 检查上传的文件组中的文件是否都满足条件
 
   for (let i = 0; i < file.length; i++) {
@@ -59,7 +86,7 @@ export function upload(url: string, file: File[], option?: UploadOption): void {
     array.push(blobData);
   }
 
-  console.log("====================================");
-  console.log(array);
-  console.log("====================================");
+  // console.log("====================================");
+  // console.log(array);
+  // console.log("====================================");
 }
