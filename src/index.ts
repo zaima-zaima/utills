@@ -22,6 +22,6 @@ input.onchange = (event) => {
   upload("/upload", fileArray, {
     limit: 1024 * 1024 * 10,
     spreadSize: 1024 * 1024 * 2,
-    accept: ["jpeg", "zip"],
+    accept: ["jpeg", "zip", "mp4"],
   });
 };
