@@ -1,3 +1,15 @@
+export interface UploadAttributes {
+  token: string;
+  name: string;
+  size: number;
+  hash: string;
+  childHash: string;
+  totalPort: number;
+  curPort: number;
+  finish: boolean;
+  fileSlice: File | Blob;
+}
+
 /**
  * 上传文件数据格式工厂
  * @param token 该文件的token

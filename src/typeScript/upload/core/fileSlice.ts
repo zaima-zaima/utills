@@ -4,7 +4,7 @@
  * @param size 切片的最大的大小，单位kb
  */
 
-export default function (file: File, size: number) {
+export default function (file: File | Blob, size: number) {
   const portion = Math.ceil(file.size / size); // 切片分数
 
   let array: Blob[] = [];

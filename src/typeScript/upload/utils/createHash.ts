@@ -2,7 +2,7 @@ import crypto from "crypto-js";
 import { parseSize } from "./parseSize";
 import fileSlice from "../core/fileSlice";
 
-export async function createHash(file: File, slice?: number) {
+export async function createHash(file: File | Blob, slice?: number) {
   slice = slice ? slice : 1024 * 1024 * 2; // 默认2M
 
   if (file.size < slice) {
