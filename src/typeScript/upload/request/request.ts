@@ -1,4 +1,5 @@
 import { UploadNetMethod } from "..";
+import type { UploadAttributes } from "../utils/uploadDataType";
 
 interface RequestOptions {
   onBeforeUpload?: () => void;
@@ -10,8 +11,7 @@ interface RequestOptions {
 export default function (
   url: string,
   method: UploadNetMethod,
-  data: Blob[],
-  name: string,
+  data: UploadAttributes[],
   totalSize: number,
   options?: RequestOptions
 ) {
@@ -26,7 +26,7 @@ export default function (
   for (let i = 0; i < data.length; i++) {
     const item = new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-
+      // xhr.setRequestHeader("Content-Type", "application/json");
       xhr.upload.addEventListener("progress", (event) => {
         current += event.loaded;
         options && options.onProgress && options.onProgress(totalSize, current);
@@ -42,11 +42,13 @@ export default function (
 
       xhr.open(method, url, true);
 
-      const formData = new FormData();
+      // const formData = new FormData();
 
-      formData.append(name, data[i]);
+      // formData.append("upload", data[i] as any);
 
-      xhr.send(formData);
+      // console.log(data[i]);
+
+      xhr.send(JSON.stringify(data[i]));
     });
 
     requestArray.push(item);

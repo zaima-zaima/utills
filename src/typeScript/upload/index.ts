@@ -1,6 +1,8 @@
 import checkFileSize from "./core/checkFileSize";
 import fileSlice from "./core/fileSlice";
+import request from "./request/request";
 import { createHash } from "./utils/createHash";
+import type { UploadAttributes } from "./utils/uploadDataType";
 
 export type UploadMethod = "formData";
 
@@ -43,19 +45,6 @@ export async function upload(
     return;
   }
 
-  const hash = await createHash(file[0]);
-
-  // 对文件进行预检
-
-  const progress = option && option.preCheck && (await option.preCheck(hash));
-
-  if (progress && !progress.done) {
-    // 成功获取进度并且文件没有传输完毕
-    console.log("====================================");
-    console.log(progress);
-    console.log("====================================");
-  }
-
   // console.log("====================================");
   // console.log(progress);
   // console.log("====================================");
@@ -79,34 +68,81 @@ export async function upload(
   // console.log("====================================");
   // console.log(crypto.MD5(type).toString());
   // console.log("====================================");
-
+  // 对文件进行切割
+  let array: Array<UploadAttributes[]> = [];
   // 检查上传的文件组中的文件是否都满足条件
 
   for (let i = 0; i < file.length; i++) {
+    const hash = await createHash(file[i]);
+
+    // 对文件进行预检
+
+    const progress = option && option.preCheck && (await option.preCheck(hash));
+
+    if (progress && !progress.done) {
+      // 成功获取进度并且文件没有传输完毕
+      // console.log("====================================");
+      // console.log(progress);
+      // console.log("====================================");
+    }
+
     const result = checkFileSize(file[i], option?.limit, option?.accept);
 
     if (!result.checkRes) {
       throw Error(result.msg);
     }
-  }
-  // 对文件进行切割
-  let array: Array<Blob[]> = [];
-  for (let i = 0; i < file.length; i++) {
+
+    const blobData = fileSlice(file[i], (option && option.spreadSize) || 0);
+
+    const filename = file[i].name;
+    const size = file[i].size;
+    const token = progress.token;
+
     if (
       !option ||
       (option && (!option.spreadSize || option.spreadSize === 0))
     ) {
       // 不需要切片
-      array.push([file[i]]);
+      array.push([
+        {
+          token,
+          size,
+          name: filename,
+          childHash: await createHash(blobData[i]),
+          hash,
+          totalPort: blobData.length,
+          curPort: i + 1,
+          finish: false,
+          fileSlice: blobData[i],
+        },
+      ]);
 
       continue;
     }
     //   // 每个切片数组
-    const blobData = fileSlice(file[i], (option && option.spreadSize) || 0);
-    array.push(blobData);
+
+    // console.log(filename, size, token);
+
+    const arr = [];
+
+    for (let i = 0; i < blobData.length; i++) {
+      arr.push({
+        token,
+        size,
+        name: filename,
+        childHash: await createHash(blobData[i]),
+        hash,
+        totalPort: blobData.length,
+        curPort: i + 1,
+        finish: i === blobData.length - 1 ? true : false,
+        fileSlice: blobData[i],
+      });
+    }
+
+    array.push(arr);
   }
 
-  // console.log("====================================");
-  // console.log(array);
-  // console.log("====================================");
+  for (let i = 0; i < array.length; i++) {
+    await request(url, "POST", array[i], array[i][0].size);
+  }
 }

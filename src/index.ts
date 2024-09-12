@@ -20,9 +20,10 @@ body.appendChild(input);
 input.onchange = (event) => {
   const fileArray = Array.from(input.files || []);
 
-  upload("/upload", fileArray, {
+  upload("/api/upload", fileArray, {
     limit: 1024 * 1024 * 10,
     spreadSize: 1024 * 1024 * 2,
+    accept: ["jpeg", "zip", "mp4"],
     preCheck: async (hash) => {
       const result = await checkFile(hash);
 
@@ -32,6 +33,5 @@ input.onchange = (event) => {
 
       return null;
     },
-    // accept: ["jpeg", "zip"],
   });
 };
