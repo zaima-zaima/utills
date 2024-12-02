@@ -14,6 +14,12 @@ export interface PreCheckResposne {
   token: string;
 }
 
+export interface UploadFileParts {
+  fileName: string;
+  hash: string;
+  parts: Array<Blob[]>;
+}
+
 /**
  * uploadMethod 上传方式，默认为formData
  * limit：文件限制大小，默认不限制,单位kb
@@ -43,43 +49,6 @@ export async function upload(
     return;
   }
 
-  const hash = await createHash(file[0]);
-
-  // 对文件进行预检
-
-  const progress = option && option.preCheck && (await option.preCheck(hash));
-
-  if (progress && !progress.done) {
-    // 成功获取进度并且文件没有传输完毕
-    console.log("====================================");
-    console.log(progress);
-    console.log("====================================");
-  }
-
-  // console.log("====================================");
-  // console.log(progress);
-  // console.log("====================================");
-
-  // console.log("====================================");
-  // console.log(hash);
-  // console.log("====================================");
-
-  // const buffer = await file[0].arrayBuffer();
-
-  // console.log("====================================");
-  // console.log(crypto.lib.WordArray.create(buffer));
-  // console.log("====================================");
-
-  // console.log("====================================");
-  // console.log(file[0].toString());
-  // console.log("====================================");
-
-  // const type = crypto.lib.WordArray.create(buffer);
-
-  // console.log("====================================");
-  // console.log(crypto.MD5(type).toString());
-  // console.log("====================================");
-
   // 检查上传的文件组中的文件是否都满足条件
 
   for (let i = 0; i < file.length; i++) {
@@ -88,10 +57,26 @@ export async function upload(
     if (!result.checkRes) {
       throw Error(result.msg);
     }
+
+    const hash = await createHash(file[i]);
+
+    // 对文件进行预检
+
+    const progress = option && option.preCheck && (await option.preCheck(hash));
+
+    if (progress && !progress.done) {
+      // 成功获取进度并且文件没有传输完毕
+      console.log("====================================");
+      console.log(progress);
+      console.log("====================================");
+    }
   }
   // 对文件进行切割
-  let array: Array<Blob[]> = [];
+
+  let uploadParts: Array<UploadFileParts> = [];
+
   for (let i = 0; i < file.length; i++) {
+    let array: Array<Blob[]> = [];
     if (
       !option ||
       (option && (!option.spreadSize || option.spreadSize === 0))
@@ -104,9 +89,15 @@ export async function upload(
     //   // 每个切片数组
     const blobData = fileSlice(file[i], (option && option.spreadSize) || 0);
     array.push(blobData);
+
+    uploadParts.push({
+      fileName: file[i].name,
+      hash: await createHash(file[i]),
+      parts: array,
+    });
   }
 
-  // console.log("====================================");
-  // console.log(array);
-  // console.log("====================================");
+  console.log("====================================");
+  console.log(uploadParts);
+  console.log("====================================");
 }
